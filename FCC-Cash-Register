@@ -1,0 +1,148 @@
+function checkCashRegister(price, cash, cid) {
+
+  let finalChange = {
+    status: '',
+    change: cid
+  }
+
+  let difference = parseFloat((cash - price).toFixed(2));
+  let cashArray = [];
+
+  for (var a = 0; a < cid.length; a++) {
+    cashArray.push(cid[a][1]);
+  }
+
+  let sumOfAllCash = cashArray.reduce(function(a, b) {
+    return +((a + b).toFixed(2));
+  }
+);
+
+  function isEmpty(arr) {
+    return arr == 0;
+  }
+
+  function changeFromEachDrawer() {
+
+    let changeNeeded = difference;
+    let changeToReturn = [];
+    let denoms = [
+      {bill: "PENNY", val: 0.01},
+      {bill: "NICKEL", val: 0.05},
+      {bill: "DIME", val: 0.10},
+      {bill: "QUARTER", val: 0.25},
+      {bill: "ONE", val: 1},
+      {bill: "FIVE", val: 5},
+      {bill: "TEN", val: 10},
+      {bill: "TWENTY", val: 20},
+      {bill: "ONE HUNDRED", val: 100}
+    ];
+
+    for (let n = cid.length - 1; n >= 0; n--) {
+
+      let denomName = denoms[n].bill;
+      let denomValue = denoms[n].val;
+      let resultPerDrawer = (changeNeeded / denomValue).toFixed(2).split('.')[0];
+
+      if (resultPerDrawer > 0 && (resultPerDrawer * denomValue) < cid[n][1]) {
+        changeToReturn.push([denomName, resultPerDrawer * denomValue]);
+        changeNeeded = (changeNeeded - (resultPerDrawer * denomValue)).toFixed(2);
+      } else if (resultPerDrawer > 0 && (resultPerDrawer * denomValue) > cid[n][1]) {
+        changeToReturn.push([denomName, cid[n][1]]);
+        changeNeeded = (changeNeeded - cid[n][1]).toFixed(2);
+      }
+    }
+
+    if (changeNeeded == 0) {
+      return changeToReturn;
+    } else if (changeNeeded > 0) {
+      changeToReturn = [];
+      return changeToReturn;
+    }
+  }
+
+  function getChange() {
+    let responseArr = [];
+    if (sumOfAllCash < difference) {
+      return [];
+    } else if (sumOfAllCash == difference) {
+      return cid;
+    } else if (sumOfAllCash > difference) {
+      return changeFromEachDrawer();
+    }
+  }
+
+  function getStatus() {
+    let changeToReturn = getChange()
+    if (sumOfAllCash < difference || changeToReturn.length == 0) {
+      return "INSUFFICIENT_FUNDS";
+    } else if (sumOfAllCash == difference) {
+      return "CLOSED";
+    } else if (sumOfAllCash > difference && changeToReturn.length > 0) {
+      return "OPEN";
+    }
+  }
+
+  finalChange.status = getStatus();
+  finalChange.change = getChange();
+  return finalChange;
+}
+
+console.log(checkCashRegister(19.5, 20, [
+  ["PENNY", 1.01],
+  ["NICKEL", 2.05],
+  ["DIME", 3.1],
+  ["QUARTER", 4.25],
+  ["ONE", 90],
+  ["FIVE", 55],
+  ["TEN", 20],
+  ["TWENTY", 60],
+  ["ONE HUNDRED", 100]
+]));
+
+console.log(checkCashRegister(3.26, 100, [
+  ["PENNY", 1.01],
+  ["NICKEL", 2.05],
+  ["DIME", 3.1],
+  ["QUARTER", 4.25],
+  ["ONE", 90],
+  ["FIVE", 55],
+  ["TEN", 20],
+  ["TWENTY", 60],
+  ["ONE HUNDRED", 100]
+]));
+
+console.log(checkCashRegister(19.5, 20, [
+  ["PENNY", 0.01],
+  ["NICKEL", 0],
+  ["DIME", 0],
+  ["QUARTER", 0],
+  ["ONE", 0],
+  ["FIVE", 0],
+  ["TEN", 0],
+  ["TWENTY", 0],
+  ["ONE HUNDRED", 0]
+]));
+
+console.log(checkCashRegister(19.5, 20, [
+  ["PENNY", 0.01],
+  ["NICKEL", 0],
+  ["DIME", 0],
+  ["QUARTER", 0],
+  ["ONE", 1],
+  ["FIVE", 0],
+  ["TEN", 0],
+  ["TWENTY", 0],
+  ["ONE HUNDRED", 0]
+]));
+
+console.log(checkCashRegister(19.5, 20, [
+  ["PENNY", 0.5],
+  ["NICKEL", 0],
+  ["DIME", 0],
+  ["QUARTER", 0],
+  ["ONE", 0],
+  ["FIVE", 0],
+  ["TEN", 0],
+  ["TWENTY", 0],
+  ["ONE HUNDRED", 0]
+]));
